@@ -1,12 +1,8 @@
 package com.ticketing.filter;
 
-import com.cybertek.entity.User;
-import com.cybertek.enums.UserState;
-import com.cybertek.util.JWTUtil;
 import com.ticketing.entity.User;
 import com.ticketing.service.SecurityService;
 import com.ticketing.utils.JWTUtil;
-
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -62,6 +58,6 @@ public class SecurityFilter extends OncePerRequestFilter {
 
     private boolean checkIfUserIsValid(String username) {
         User currentUser = securityService.loadUser(username);
-        return currentUser != null && currentUser.getIsVerified() && currentUser.getState() == UserState.ACTIVE;
+        return currentUser != null && currentUser.getEnabled();
     }
 }
