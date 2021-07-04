@@ -4,8 +4,9 @@ import com.cybertek.entity.User;
 import com.cybertek.enums.UserState;
 import com.cybertek.util.JWTUtil;
 import com.ticketing.entity.User;
+import com.ticketing.service.SecurityService;
 import com.ticketing.utils.JWTUtil;
-import org.springdoc.core.SecurityService;
+
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -29,6 +30,8 @@ public class SecurityFilter extends OncePerRequestFilter {
         this.jwtUtil = jwtUtil;
         this.securityService = securityService;
     }
+
+
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest,
                                     HttpServletResponse httpServletResponse,

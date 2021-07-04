@@ -1,6 +1,7 @@
 package com.ticketing.config;
 
-import com.cybertek.service.SecurityFilter;
+
+import com.ticketing.filter.SecurityFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,6 +17,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private SecurityFilter securityFilter;
+
+
 
     @Override
     @Bean
@@ -34,6 +37,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             "/swagger-ui/**",
             "/webjars/**",
     };
+
+
 
     @Override
     protected void configure(HttpSecurity http) throws Exception{
