@@ -23,8 +23,8 @@ import java.util.Optional;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class ExceptionMessageHandler {
 
-    @ExceptionHandler(ServiceException.class)
-    public ResponseEntity<ResponseWrapper> serviceException(ServiceException se){
+    @ExceptionHandler(TicketingProjectException.class)
+    public ResponseEntity<ResponseWrapper> serviceException(TicketingProjectException se){
         String message = se.getMessage();
         return new ResponseEntity<>(ResponseWrapper.builder().success(false).code(HttpStatus.CONFLICT.value()).message(message).build(),HttpStatus.CONFLICT);
     }
@@ -51,7 +51,7 @@ public class ExceptionMessageHandler {
         return new ResponseEntity<>(ResponseWrapper.builder().success(false).message("Action failed: An error occurred!").code(HttpStatus.INTERNAL_SERVER_ERROR.value()).build(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
     private Optional<DefaultExceptionMessageDto> getMessageFromAnnotation(Method method) {
-        com.cybertek.annotation.DefaultExceptionMessage defaultExceptionMessage = method.getAnnotation(com.cybertek.annotation.DefaultExceptionMessage.class);
+        com.ticketing.annotation.DefaultExceptionMessage defaultExceptionMessage = method.getAnnotation(com.ticketing.annotation.DefaultExceptionMessage.class);
         if (defaultExceptionMessage != null) {
             DefaultExceptionMessageDto defaultExceptionMessageDto = DefaultExceptionMessageDto
                     .builder()
