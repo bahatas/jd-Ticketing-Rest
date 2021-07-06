@@ -1,7 +1,7 @@
 package com.ticketing.service;
 
+import com.ticketing.entity.ConfirmationToken;
 import com.ticketing.exception.TicketingProjectException;
-import com.ticketing.repository.ConfirmationToken;
 import org.springframework.mail.SimpleMailMessage;
 
 public interface ConfirmationTokenService {

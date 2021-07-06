@@ -2,29 +2,34 @@ package com.ticketing.implementation;
 
 import com.ticketing.dto.UserDTO;
 import com.ticketing.entity.User;
-
-import com.ticketing.mapper.UserMapper;
+import com.ticketing.exception.TicketingProjectException;
 import com.ticketing.repository.UserRepository;
 import com.ticketing.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.ticketing.utils.MapperUtil;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class UserServiceImpl  implements UserService {
+public class UserServiceImpl implements UserService {
 
 
-    UserRepository userRepository;
+    private UserRepository userRepository;
+//    private ProjectService projectService;
+//    private TaskService taskService;
+    private MapperUtil mapperUtil;
+    private PasswordEncoder passwordEncoder;
 
-
-    UserMapper userMapper;
-
-    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper) {
+    public UserServiceImpl(UserRepository userRepository, MapperUtil mapperUtil, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
-        this.userMapper = userMapper;
+        this.mapperUtil = mapperUtil;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -32,7 +37,7 @@ public class UserServiceImpl  implements UserService {
         List<User> list = userRepository.findAll(Sort.by("firstName"));
 
         //convert entity to DTO
-        return list.stream().map(each->{return userMapper.convertToDto(each); }).collect(Collectors.toList());
+    return list.stream().map(each->mapperUtil.convert(each, new UserDTO())).collect(Collectors.toList());
     }
 
     @Override
@@ -40,39 +45,58 @@ public class UserServiceImpl  implements UserService {
 
         User user=userRepository.findByUserName(username);
         //converto to DTO
-        return userMapper.convertToDto(user);
+
+        return mapperUtil.convert(user,new UserDTO());
     }
 
 
-
     @Override
-    public void save(UserDTO userDTO) {
+    public UserDTO save(UserDTO userDTO) throws TicketingProjectException {
+
+        User foundUser = userRepository.findByUserName(userDTO.getUserName());
+
+        if (foundUser != null) {
+            throw new TicketingProjectException("User Already exist");
+        }
 
 
-        //dto to entity
-       User user= userMapper.convertToEntity(userDTO);
 
-        //save with implemented method via Jpa
-        userRepository.save(user);
+        User user = mapperUtil.convert(userDTO,new User());
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        User save = userRepository.save(user);
+
+
+        return mapperUtil.convert(save,new UserDTO());
     }
 
     @Override
-    public UserDTO update(UserDTO userDTO) {
+    public UserDTO update(UserDTO dto) throws TicketingProjectException, AccessDeniedException {
 
         //Find current user
-        User user = userRepository.findByUserName(userDTO.getUserName());
-        //map update user dto to entity object
-        User convertedUser=userMapper.convertToEntity(userDTO);
+        User user = userRepository.findByUserName(dto.getUserName());
+
+        if(user == null){
+            throw new TicketingProjectException("User Does Not Exists");
+        }
+        //Map update user dto to entity object
+        User convertedUser = mapperUtil.convert(dto,new User());
+        convertedUser.setPassword(passwordEncoder.encode(convertedUser.getPassword()));
+        if(!user.getEnabled()){
+            throw new TicketingProjectException("User is not confirmed");
+        }
+
+        checkForAuthorities(user);
+
+        convertedUser.setEnabled(true);
+
         //set id to the converted object
         convertedUser.setId(user.getId());
-
-        //savd updated user
+        //save updated user
         userRepository.save(convertedUser);
 
-
-        return findByUserName(userDTO.getUserName());
+        return findByUserName(dto.getUserName());
     }
-
     @Override
     public void delete(String username) {
 
@@ -87,6 +111,10 @@ public class UserServiceImpl  implements UserService {
     public List<UserDTO> listAllByRole(String role) {
         List<User> users = userRepository.findAllByRoleDescriptionIgnoreCase(role);
 
-        return users.stream().map(each->{return userMapper.convertToDto(each);}).collect(Collectors.toList());
+        return users.stream().map(each->{return mapperUtil.convert(each,new UserDTO());}).collect(Collectors.toList());
+    }
+
+    public void checkForAuthorities(User user){
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     }
 }

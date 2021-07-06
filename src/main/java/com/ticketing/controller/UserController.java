@@ -1,89 +1,81 @@
 package com.ticketing.controller;
 
+import com.ticketing.dto.MailDTO;
 import com.ticketing.dto.UserDTO;
-import com.ticketing.service.RoleService;
+import com.ticketing.entity.ConfirmationToken;
+import com.ticketing.entity.ResponseWrapper;
+import com.ticketing.entity.User;
+import com.ticketing.exception.TicketingProjectException;
+import com.ticketing.service.ConfirmationTokenService;
 import com.ticketing.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import com.ticketing.utils.MapperUtil;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
-@RequestMapping("/user")
-public class  UserController {
+@RestController
+@RequestMapping("/api/v1/user")
+@Tag(name = "User Controller", description = "User API")
+public class UserController {
 
-    @Autowired
-    UserService userService;
+    @Value("${app.local-url}")
+    private String BASE_URL;
 
-    @Autowired
-    RoleService roleService;
-
-    @GetMapping("/create")
-    public String createUser(Model model) {
-
-        model.addAttribute("user", new UserDTO());
-        model.addAttribute("roles", roleService.listAllRoles());
-        model.addAttribute("users", userService.listAllUser());
-
-        return "user/create";
-    }
-
-    @PostMapping("/create")
-    public String insertUser(UserDTO user, Model model) {
-
-        userService.save(user);
-//        model.addAttribute("user",new UserDTO());
-//        model.addAttribute("roles",roleService.findAll());
-//        model.addAttribute("users",userService.findAll());
-        //<< these lines are not need so that user/create one also has same lines. >>
+    private UserService userService;
+    private ConfirmationTokenService confirmationTokenService;
+    private MapperUtil mapperUtil;
 
 
-        return "redirect:/user/create";
+    public UserController(UserService userService, ConfirmationTokenService confirmationTokenService, MapperUtil mapperUtil) {
+        this.userService = userService;
+        this.confirmationTokenService = confirmationTokenService;
+        this.mapperUtil = mapperUtil;
     }
 
 
-    @GetMapping("/update/{username}")
-    public String editUser(@PathVariable("username") String username, Model model) {
+    @PostMapping("/create-user")
+    public ResponseEntity<ResponseWrapper> doRegister(@RequestBody UserDTO userDTO) throws TicketingProjectException {
 
-        model.addAttribute("user", userService.findByUserName(username));
-        model.addAttribute("users", userService.listAllUser());
-        model.addAttribute("roles", roleService.listAllRoles());
+        UserDTO createdUser = userService.save(userDTO);
+        sendEmail(createEmail(createdUser));
 
-        return "update1";
+
+
+        return ResponseEntity.ok(new ResponseWrapper("User has been created",createdUser));
+
+
     }
 
 
-    @PostMapping("/update/{username}")
-    public String updateUser(@PathVariable("username") String username,UserDTO userDTO, Model model) {
-        userService.update(userDTO);
+    private void sendEmail(MailDTO mailDTO) {
 
-
-
-        return "redirect:/user/create";
+        SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
+        simpleMailMessage.setTo(mailDTO.getEmailTo());
+        simpleMailMessage.setSubject(mailDTO.getSubject());
+        simpleMailMessage.setText(mailDTO.getMessage()+mailDTO.getUrl()+mailDTO.getToken());
+        confirmationTokenService.sendEmail(simpleMailMessage);
     }
 
+    private MailDTO createEmail(UserDTO userDTO) {
+        User user = mapperUtil.convert(userDTO, new User());
+        ConfirmationToken confirmationToken = new ConfirmationToken(user);
+        confirmationToken.setIsDeleted(false);
 
-    @PostMapping("/delete/{username}")
-    public String deleteUser(@PathVariable("username") String username, UserDTO user, Model model) {
-        userService.update(user);
+        ConfirmationToken createdConfirmationToken = confirmationTokenService.save(confirmationToken);
+
+        return MailDTO.builder()
+                .emailTo(user.getUserName())
+                .token(createdConfirmationToken.getToken())
+                .subject("Confirm Registration")
+                .message("To Confirm your account, please click here")
+                .url(BASE_URL + "/confirmation?token=")
+                .build();
 
 
-//        model.addAttribute("user",new UserDTO());
-//        model.addAttribute("roles",roleService.findAll());
-//        model.addAttribute("users",userService.findAll());
-        //<< these lines are not need so that user/create one also has same lines. >>
-
-        return "redirect:/user/create";
-
-    }
-
-    @GetMapping("/delete/{username}")
-    public String deleteUser(@PathVariable("username") String username) {
-
-        userService.deleteByUserName(username);
-        return "redirect:/user/create";
     }
 }
