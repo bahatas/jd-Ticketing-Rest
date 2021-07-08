@@ -5,8 +5,10 @@ import com.ticketing.dto.RoleDTO;
 import com.ticketing.dto.UserDTO;
 import com.ticketing.entity.User;
 import com.ticketing.exception.TicketingProjectException;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
+
 
 
 public interface UserService {
@@ -22,6 +24,7 @@ public interface UserService {
 
     List<UserDTO> listAllByRole(String role);
 
+    UserDTO confirm (User user);
 
 
 }

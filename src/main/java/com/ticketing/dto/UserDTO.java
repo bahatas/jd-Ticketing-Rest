@@ -1,5 +1,7 @@
 package com.ticketing.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ticketing.utils.Gender;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,6 +12,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
+@JsonIgnoreProperties(value = {"hibernateLazyInitilaizer"}, ignoreUnknown = true)
 public class UserDTO {
 
     private Long id;
@@ -17,7 +20,11 @@ public class UserDTO {
     private String firstName;
     private String lastName;
     private String userName;
-    private String passWord;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private String password;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private String confirmPassword;
+
     private boolean enabled;
     private String phone;
     private RoleDTO role;

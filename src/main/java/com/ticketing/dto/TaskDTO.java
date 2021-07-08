@@ -1,5 +1,6 @@
 package com.ticketing.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.ticketing.utils.Status;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,7 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Getter
 @Setter
-
+@JsonIgnoreProperties(value = {"hibernateLazyInitilaizer"}, ignoreUnknown = true)
 public class TaskDTO {
 
 

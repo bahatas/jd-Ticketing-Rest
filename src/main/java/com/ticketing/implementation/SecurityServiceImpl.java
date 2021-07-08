@@ -42,7 +42,7 @@ public class SecurityServiceImpl implements SecurityService {
             throw new UsernameNotFoundException("This user not found ");
         }
 
-        return new org.springframework.security.core.userdetails.User(user.getId().toString(), user.getPassWord(),listAuthorities(user) );
+        return new org.springframework.security.core.userdetails.User(user.getId().toString(), user.getPassword(),listAuthorities(user) );
 
     }
 

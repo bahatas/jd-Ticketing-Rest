@@ -114,6 +114,14 @@ public class UserServiceImpl implements UserService {
         return users.stream().map(each->{return mapperUtil.convert(each,new UserDTO());}).collect(Collectors.toList());
     }
 
+    @Override
+    public UserDTO confirm(User user) {
+        user.setEnabled(true);
+        User confirmedUser = userRepository.save(user);
+
+        return mapperUtil.convert(confirmedUser,new UserDTO());
+    }
+
     public void checkForAuthorities(User user){
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     }

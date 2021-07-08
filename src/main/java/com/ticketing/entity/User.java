@@ -1,6 +1,8 @@
 package com.ticketing.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ticketing.utils.Gender;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,12 +20,16 @@ import javax.persistence.*;
 @Entity
 @Table(name = "users")
 @Where(clause = "is_Deleted=false")
+@JsonIgnoreProperties(value = {"hibernateLazyInitilaizer"}, ignoreUnknown = true)
 public class User extends BaseEntity {
 
     private String firstName;
     private String lastName;
     private String userName;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private String confirmPassword;
     private Boolean enabled;
     private String phone;
 
