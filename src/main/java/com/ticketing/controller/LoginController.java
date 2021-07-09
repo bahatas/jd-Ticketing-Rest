@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -50,8 +51,8 @@ public class LoginController {
 		String username = authenticationRequest.getUsername();
 		String password = authenticationRequest.getPassword();
 
-//		UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username,password);
-//		authenticationManager.authenticate(authenticationToken); // debug
+		UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username,password);
+		authenticationManager.authenticate(authenticationToken); // debug
 
 		UserDTO foundUser = userService.findByUserName(username);
 		User convertedUser = mapperUtil.convert(foundUser, new User());

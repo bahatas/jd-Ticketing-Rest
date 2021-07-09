@@ -1,4 +1,4 @@
-package com.ticketing.utils;
+package com.ticketing.enums;
 
 public enum Status {
 
