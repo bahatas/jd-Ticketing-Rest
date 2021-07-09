@@ -1,7 +1,7 @@
 package com.ticketing.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.ticketing.utils.Status;
+import com.ticketing.enums.Status;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

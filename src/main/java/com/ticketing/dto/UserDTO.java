@@ -1,4 +1,4 @@
-package com.ticketing.dto;
+package com.ticketing.dto;+
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -26,7 +26,7 @@ public class UserDTO {
     private String confirmPassword;
 
     private boolean enabled;
-    private String phone;
+    private String phone;11111123
     private RoleDTO role;
     private Gender gender;
 }
