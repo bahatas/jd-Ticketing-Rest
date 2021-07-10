@@ -1,7 +1,7 @@
 package com.ticketing.entity;
 
 
-import com.ticketing.utils.Status;
+import com.ticketing.enums.Status;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

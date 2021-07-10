@@ -21,7 +21,7 @@ spring:
     show-sql: true
   sql:
     init:
-      mode: never
+      mode: always
       data-locations: classpath:data.sql
 security:
   jwt:
@@ -36,7 +36,7 @@ springdoc:
     properties:
       mail:
         transport:
-         protocol: stmp
+          protocol: stmp
         stmp:
           starttls:
             enable: true
