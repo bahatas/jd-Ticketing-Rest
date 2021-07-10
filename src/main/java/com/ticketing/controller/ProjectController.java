@@ -103,7 +103,7 @@ public class ProjectController {
     @PreAuthorize("hasAnyAuthority('Manager','Admin')")
     public ResponseEntity<ResponseWrapper> readAllProjectDetails()  {
 
-        projectServise.read
+
         return ResponseEntity.ok(new ResponseWrapper("Project is deleted"));
     }
 

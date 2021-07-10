@@ -9,9 +9,7 @@ import com.ticketing.mapper.ProjectMapper;
 import com.ticketing.repository.ProjectRepository;
 import com.ticketing.repository.UserRepository;
 import com.ticketing.service.ProjectServise;
-
 import com.ticketing.utils.MapperUtil;
-import org.apache.catalina.mapper.Mapper;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
