@@ -132,6 +132,8 @@ public class ProjectServiceImp implements ProjectService
 
     @Override
     public List<ProjectDTO> listAllNonCompletedProjects() {
-        projectRepository
+       return null;
     }
+
+
 }
