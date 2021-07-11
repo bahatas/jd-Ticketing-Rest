@@ -6,17 +6,15 @@ import com.ticketing.dto.ProjectDTO;
 import com.ticketing.entity.ResponseWrapper;
 import com.ticketing.enums.Status;
 import com.ticketing.exception.TicketingProjectException;
-import com.ticketing.service.ProjectServise;
+import com.ticketing.service.ProjectService;
 import com.ticketing.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.function.ToDoubleBiFunction;
 
 
 @RestController
@@ -24,11 +22,11 @@ import java.util.function.ToDoubleBiFunction;
 @Tag(name="Project Controller", description = "Project API")
 public class ProjectController {
 
-    private ProjectServise projectServise;
+    private ProjectService projectService;
     private UserService userService;
 
-    public ProjectController(ProjectServise projectServise, UserService userService) {
-        this.projectServise = projectServise;
+    public ProjectController(ProjectService projectService, UserService userService) {
+        this.projectService = projectService;
         this.userService = userService;
     }
 
@@ -38,7 +36,7 @@ public class ProjectController {
     @PreAuthorize("hasAnyAuthority('Manager','Admin')")
     public ResponseEntity<ResponseWrapper> createProject(@RequestBody ProjectDTO projectDTO) throws TicketingProjectException {
 
-        ProjectDTO projectDTO1 = projectServise.save(projectDTO);
+        ProjectDTO projectDTO1 = projectService.save(projectDTO);
 
         return ResponseEntity.ok(new ResponseWrapper("Successfully project created",projectDTO1));
     }
@@ -49,7 +47,7 @@ public class ProjectController {
     @Operation(summary = "Read All Project")
     @PreAuthorize("hasAnyAuthority('Manager','Admin')")
     public ResponseEntity<ResponseWrapper> readAll(){
-        List<ProjectDTO> listOfProjects = projectServise.listAllProjects();
+        List<ProjectDTO> listOfProjects = projectService.listAllProjects();
         return ResponseEntity.ok(new ResponseWrapper("Projects are retrieved",listOfProjects));
     }
 
@@ -59,7 +57,7 @@ public class ProjectController {
     @Operation(summary = "Read project by project Code")
     @PreAuthorize("hasAnyAuthority('Manager','Admin')")
     public ResponseEntity<ResponseWrapper> readByProjectCode(@RequestParam String projectCode){
-       ProjectDTO projectDTO = projectServise.getByProjectCode(projectCode);
+       ProjectDTO projectDTO = projectService.getByProjectCode(projectCode);
         return ResponseEntity.ok(new ResponseWrapper("Project is retrieved",projectDTO));
     }
 
@@ -68,7 +66,7 @@ public class ProjectController {
     @Operation(summary = "Update Project")
     @PreAuthorize("hasAnyAuthority('Manager','Admin')")
     public ResponseEntity<ResponseWrapper> updateProject(@RequestBody ProjectDTO projectDTO){
-       ProjectDTO updatedProject = projectServise.update(projectDTO);
+       ProjectDTO updatedProject = projectService.update(projectDTO);
 
         return ResponseEntity.ok(new ResponseWrapper("Project is updated",updatedProject));
     }
@@ -81,7 +79,7 @@ public class ProjectController {
     @PreAuthorize("hasAnyAuthority('Manager','Admin')")
     public ResponseEntity<ResponseWrapper> completeProject(@RequestParam String projectCode) throws TicketingProjectException {
 
-        ProjectDTO projectDTO = projectServise.complete(projectCode);
+        ProjectDTO projectDTO = projectService.complete(projectCode);
         projectDTO.setProjectStatus(Status.COMPLETE);
 
         return ResponseEntity.ok(new ResponseWrapper("Project is completed",projectDTO));
@@ -93,7 +91,7 @@ public class ProjectController {
     @PreAuthorize("hasAnyAuthority('Manager','Admin')")
     public ResponseEntity<ResponseWrapper> deleteProject(@RequestParam String projectCode) throws TicketingProjectException {
 
-        projectServise.delete(projectCode);
+        projectService.delete(projectCode);
         return ResponseEntity.ok(new ResponseWrapper("Project is deleted"));
     }
 

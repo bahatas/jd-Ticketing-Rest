@@ -1,128 +1,123 @@
 package com.ticketing.implementation;
 
-import com.ticketing.dto.UserDTO;
+import com.ticketing.dto.ProjectDTO;
+import com.ticketing.dto.TaskDTO;
+import com.ticketing.entity.Task;
 import com.ticketing.entity.User;
+import com.ticketing.enums.Status;
 import com.ticketing.exception.TicketingProjectException;
+import com.ticketing.repository.TaskRepository;
 import com.ticketing.repository.UserRepository;
-import com.ticketing.service.UserService;
+import com.ticketing.service.TaskService;
 import com.ticketing.utils.MapperUtil;
-import org.springframework.data.domain.Sort;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class TaskServiceImpl implements UserService {
+public class TaskServiceImpl implements TaskService {
 
-
-    private UserRepository userRepository;
-//    private ProjectService projectService;
-//    private TaskService taskService;
     private MapperUtil mapperUtil;
-    private PasswordEncoder passwordEncoder;
+    private TaskRepository taskRepository;
+    private UserRepository userRepository;
 
-    public TaskServiceImpl(UserRepository userRepository, MapperUtil mapperUtil, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
+    public TaskServiceImpl(MapperUtil mapperUtil, TaskRepository taskRepository, UserRepository userRepository) {
         this.mapperUtil = mapperUtil;
-        this.passwordEncoder = passwordEncoder;
+        this.taskRepository = taskRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
-    public List<UserDTO> listAllUser() {
-        List<User> list = userRepository.findAll(Sort.by("firstName"));
-
-        //convert entity to DTO
-    return list.stream().map(each->mapperUtil.convert(each, new UserDTO())).collect(Collectors.toList());
-    }
-
-    @Override
-    public UserDTO findByUserName(String username) {
-
-        User user=userRepository.findByUserName(username);
-        //converto to DTO
-
-        return mapperUtil.convert(user,new UserDTO());
-    }
+    public TaskDTO findById(Long id) throws TicketingProjectException {
 
 
-    @Override
-    public UserDTO save(UserDTO userDTO) throws TicketingProjectException {
+        Task task = taskRepository.findById(id).orElseThrow(() -> new TicketingProjectException("No task founded by this id"));
 
-        User foundUser = userRepository.findByUserName(userDTO.getUserName());
-
-        if (foundUser != null) {
-            throw new TicketingProjectException("User Already exist");
-        }
-
-
-
-        User user = mapperUtil.convert(userDTO,new User());
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-
-        User save = userRepository.save(user);
-
-
-        return mapperUtil.convert(save,new UserDTO());
-    }
-
-    @Override
-    public UserDTO update(UserDTO dto) throws TicketingProjectException, AccessDeniedException {
-
-        //Find current user
-        User user = userRepository.findByUserName(dto.getUserName());
-
-        if(user == null){
-            throw new TicketingProjectException("User Does Not Exists");
-        }
-        //Map update user dto to entity object
-        User convertedUser = mapperUtil.convert(dto,new User());
-        convertedUser.setPassword(passwordEncoder.encode(convertedUser.getPassword()));
-        if(!user.getEnabled()){
-            throw new TicketingProjectException("User is not confirmed");
-        }
-
-        checkForAuthorities(user);
-
-        convertedUser.setEnabled(true);
-
-        //set id to the converted object
-        convertedUser.setId(user.getId());
-        //save updated user
-        userRepository.save(convertedUser);
-
-        return findByUserName(dto.getUserName());
-    }
-    @Override
-    public void delete(String username) {
+        return mapperUtil.convert(task, new TaskDTO());
 
     }
 
     @Override
-    public void deleteByUserName(String username) {
-        userRepository.deleteByUserName(username);
+    public List<TaskDTO> listAllTasks() {
+        List<Task> listOfTasks = taskRepository.findAll();
+
+        return listOfTasks.stream().map(each -> mapperUtil.convert(each, new TaskDTO())).collect(Collectors.toList());
     }
 
     @Override
-    public List<UserDTO> listAllByRole(String role) {
-        List<User> users = userRepository.findAllByRoleDescriptionIgnoreCase(role);
+    public TaskDTO save(TaskDTO dto) {
+        dto.setTaskStatus(Status.OPEN);
+        dto.setAssignedDate(LocalDate.now());
+        Task task = mapperUtil.convert(dto, new Task());
 
-        return users.stream().map(each->{return mapperUtil.convert(each,new UserDTO());}).collect(Collectors.toList());
+
+        Task savedTask = taskRepository.save(task);
+
+
+        return mapperUtil.convert(savedTask, new TaskDTO());
+
+
     }
 
     @Override
-    public UserDTO confirm(User user) {
-        user.setEnabled(true);
-        User confirmedUser = userRepository.save(user);
+    public TaskDTO update(TaskDTO dto) throws TicketingProjectException {
 
-        return mapperUtil.convert(confirmedUser,new UserDTO());
+        taskRepository.findById(dto.getId()).orElseThrow(()-> new TicketingProjectException("Task doesn't exist"));
+        //todo
+        // Why we did not assigned to any local variable this founded task?
+        // only checks request body task exist or not?
+
+        Task convertedTask = mapperUtil.convert(dto,new Task());
+
+        Task save = taskRepository.save(convertedTask);
+
+        return mapperUtil.convert(save,new TaskDTO());
     }
 
-    public void checkForAuthorities(User user){
-        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    @Override
+    public void delete(long id) {
+
+    }
+
+    @Override
+    public int totalNonCompletedTasks(String projectCode) {
+        return 0;
+    }
+
+    @Override
+    public int totalCompletedTasks(String projectCode) {
+        return 0;
+    }
+
+    @Override
+    public void deleteByProject(ProjectDTO project) {
+
+    }
+
+    @Override
+    public List<TaskDTO> listAllByProject(ProjectDTO projectDTO) {
+        return null;
+    }
+
+    @Override
+    public List<TaskDTO> listAllTasksByStatusIsNot(ProjectDTO projectDTO) {
+        return null;
+    }
+
+    @Override
+    public List<TaskDTO> listAllTasksByProjectManager(ProjectDTO projectDTO) {
+        return null;
+    }
+
+    @Override
+    public TaskDTO updateStatus(TaskDTO dto) {
+        return null;
+    }
+
+    @Override
+    public List<TaskDTO> readAllByEmployee(User assignedEmployee) {
+        return null;
     }
 }

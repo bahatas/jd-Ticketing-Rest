@@ -13,13 +13,13 @@ import java.util.List;
 
 public interface TaskService {
 
-    TaskDTO findById(Long id);
+    TaskDTO findById(Long id) throws TicketingProjectException;
 
     List<TaskDTO> listAllTasks();
 
     TaskDTO save(TaskDTO dto);
 
-    TaskDTO update(TaskDTO dto);
+    TaskDTO update(TaskDTO dto) throws TicketingProjectException;
 
     void delete(long id);
 

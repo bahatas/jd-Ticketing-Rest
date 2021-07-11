@@ -7,7 +7,7 @@ import com.ticketing.exception.TicketingProjectException;
 
 import java.util.List;
 
-public interface ProjectServise {
+public interface ProjectService {
 
     ProjectDTO getByProjectCode(String code);
     List<ProjectDTO> listAllProjects();

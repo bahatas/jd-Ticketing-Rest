@@ -8,7 +8,7 @@ import com.ticketing.exception.TicketingProjectException;
 import com.ticketing.mapper.ProjectMapper;
 import com.ticketing.repository.ProjectRepository;
 import com.ticketing.repository.UserRepository;
-import com.ticketing.service.ProjectServise;
+import com.ticketing.service.ProjectService;
 import com.ticketing.utils.MapperUtil;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class ProjectServiceImp implements ProjectServise
+public class ProjectServiceImp implements ProjectService
 {
 
     private ProjectMapper projectMapper;
