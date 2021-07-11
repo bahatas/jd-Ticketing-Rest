@@ -9,6 +9,7 @@ import com.ticketing.mapper.ProjectMapper;
 import com.ticketing.repository.ProjectRepository;
 import com.ticketing.repository.UserRepository;
 import com.ticketing.service.ProjectService;
+import com.ticketing.service.TaskService;
 import com.ticketing.utils.MapperUtil;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,13 +26,15 @@ public class ProjectServiceImp implements ProjectService
     private ProjectRepository projectRepository;
     private MapperUtil mapperUtil;
     private UserRepository userRepository;
+    private TaskService taskService
 
     public ProjectServiceImp(ProjectMapper projectMapper, ProjectRepository projectRepository,
-                             MapperUtil mapperUtil, UserRepository userRepository) {
+                             MapperUtil mapperUtil, UserRepository userRepository, TaskService taskService) {
         this.projectMapper = projectMapper;
         this.projectRepository = projectRepository;
         this.mapperUtil = mapperUtil;
         this.userRepository = userRepository;
+        this.taskService = taskService;
     }
 
     @Override
@@ -103,11 +106,13 @@ public class ProjectServiceImp implements ProjectService
 
         return allByAssignedManager.stream().map(project -> {
             ProjectDTO obj = mapperUtil.convert(project,new ProjectDTO());
-            obj.setUnfinishedTaskCounts();
+            obj.setUnfinishedTaskCounts(taskService.totalNonCompletedTasks(project.getProjectCode()));
+            obj.setCompleteTaskCounts(taskService.totalNonCompletedTasks(project.getProjectCode()));
+
+            return obj;
 
 
-
-        })
+        }).collect(Collectors.toList());
 
 
 
@@ -115,11 +120,18 @@ public class ProjectServiceImp implements ProjectService
 
     @Override
     public List<ProjectDTO> readAllByAssignedManager(User user) {
-        return null;
+
+        List<Project> allByAssignedManager = projectRepository.findAllByAssignedManager(user);
+
+        return allByAssignedManager.stream().map(
+                each-> mapperUtil.convert(each, new ProjectDTO())
+        ).collect(Collectors.toList());
+
+
     }
 
     @Override
     public List<ProjectDTO> listAllNonCompletedProjects() {
-        return null;
+        projectRepository
     }
 }
