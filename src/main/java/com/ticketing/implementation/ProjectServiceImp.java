@@ -26,7 +26,7 @@ public class ProjectServiceImp implements ProjectService
     private ProjectRepository projectRepository;
     private MapperUtil mapperUtil;
     private UserRepository userRepository;
-    private TaskService taskService
+    private TaskService taskService;
 
     public ProjectServiceImp(ProjectMapper projectMapper, ProjectRepository projectRepository,
                              MapperUtil mapperUtil, UserRepository userRepository, TaskService taskService) {
@@ -101,7 +101,7 @@ public class ProjectServiceImp implements ProjectService
         List<Project> allByAssignedManager = projectRepository.findAllByAssignedManager(user);
 
         if(allByAssignedManager.size()==0){
-           throw new TicketingProjectException("This manager does not have any project assigned")
+           throw new TicketingProjectException("This manager does not have any project assigned");
         }
 
         return allByAssignedManager.stream().map(project -> {
@@ -113,8 +113,6 @@ public class ProjectServiceImp implements ProjectService
 
 
         }).collect(Collectors.toList());
-
-
 
     }
 
