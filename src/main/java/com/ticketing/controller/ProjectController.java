@@ -97,12 +97,14 @@ public class ProjectController {
 
     @GetMapping("/details")
     @DefaultExceptionMessage(defaultMessage = "Something went wrong try again")
-    @Operation(summary = "Project Details")
-    @PreAuthorize("hasAnyAuthority('Manager','Admin')")
-    public ResponseEntity<ResponseWrapper> readAllProjectDetails()  {
+    @Operation(summary = "Read all Project Details")
+    @PreAuthorize("hasAuthority('Manager')")
+    public ResponseEntity<ResponseWrapper> readAllProjectDetails() throws TicketingProjectException {
+
+        List<ProjectDTO> projectDTOS = projectService.listAllProjectDetails();
 
 
-        return ResponseEntity.ok(new ResponseWrapper("Project is deleted"));
+        return ResponseEntity.ok(new ResponseWrapper("Project is deleted",projectDTOS));
     }
 
 }

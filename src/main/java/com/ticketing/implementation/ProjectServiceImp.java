@@ -130,7 +130,12 @@ public class ProjectServiceImp implements ProjectService
 
     @Override
     public List<ProjectDTO> listAllNonCompletedProjects() {
-       return null;
+
+        List<Project> allByProjectStatusIsNot = projectRepository.findAllByProjectStatusIsNot(Status.COMPLETE);
+
+        return allByProjectStatusIsNot.stream().map(each->mapperUtil.convert(each, new ProjectDTO())).collect(Collectors.toList());
+
+
     }
 
 
