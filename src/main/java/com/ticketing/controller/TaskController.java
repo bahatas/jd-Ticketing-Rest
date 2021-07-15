@@ -3,6 +3,7 @@ package com.ticketing.controller;
 import com.ticketing.annotation.DefaultExceptionMessage;
 import com.ticketing.dto.TaskDTO;
 import com.ticketing.entity.ResponseWrapper;
+import com.ticketing.enums.Status;
 import com.ticketing.exception.TicketingProjectException;
 import com.ticketing.service.TaskService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -49,7 +50,7 @@ public class TaskController {
 
     @GetMapping("/{id}")
     @DefaultExceptionMessage(defaultMessage = "Something went wrong please try again")
-    @Operation(summary = "Read all tasks by project id")
+    @Operation(summary = "Read task by id")
     @PreAuthorize("hasAnyAuthority('Manager','Employee')")
     public ResponseEntity<ResponseWrapper> readTasksById(@PathVariable("id") Long id ) throws TicketingProjectException {
         TaskDTO byId = taskService.findById(id);
@@ -60,7 +61,7 @@ public class TaskController {
 
     @PostMapping("/create")
     @DefaultExceptionMessage(defaultMessage = "Something went wrong please try again")
-    @Operation(summary = "Create new Task")
+    @Operation(summary = "Create a new task")
     @PreAuthorize("hasAuthority('Manager')")
     public ResponseEntity<ResponseWrapper> createTask(@RequestBody  TaskDTO taskDTO ) throws TicketingProjectException {
         TaskDTO save = taskService.save(taskDTO);
@@ -69,19 +70,38 @@ public class TaskController {
 
     @DeleteMapping("{id}")
     @DefaultExceptionMessage(defaultMessage = "Something went wrong please try again")
-    @Operation(summary = "Delete Task")
+    @Operation(summary = "Delete task")
     @PreAuthorize("hasAuthority('Manager')")
     public ResponseEntity<ResponseWrapper> deleteTask(@PathVariable("id") Long id ) throws TicketingProjectException {
         taskService.delete(id);
         return ResponseEntity.ok(new ResponseWrapper("Successfully deleted."));
     }
 
-    @PutMapping("/update")
+    @PutMapping()
     @DefaultExceptionMessage(defaultMessage = "Something went wrong please try again")
     @Operation(summary = "Update Task")
     @PreAuthorize("hasAuthority('Manager')")
     public ResponseEntity<ResponseWrapper> updateTask(@RequestBody TaskDTO taskDTO ) throws TicketingProjectException {
         TaskDTO updatedTask = taskService.update(taskDTO);
         return ResponseEntity.ok(new ResponseWrapper("Successfully updated.",updatedTask));
+    }
+
+
+    @GetMapping("/employee")
+    @DefaultExceptionMessage(defaultMessage = "Something went wrong please try again")
+    @Operation(summary = "Read all non completed tasks")
+    @PreAuthorize("hasAuthority('Employee')")
+    public ResponseEntity<ResponseWrapper> employeereadAllNonCompleteTask() throws TicketingProjectException {
+        List<TaskDTO> taskDTOS = taskService.listAllTasksByStatusIsNot(Status.COMPLETE);
+        return ResponseEntity.ok(new ResponseWrapper("Successfully retrieved all non completed tasks.",taskDTOS));
+    }
+
+    @PutMapping("/employee/update")
+    @DefaultExceptionMessage(defaultMessage = "Something went wrong please try again")
+    @Operation(summary = "Read employee task")
+    @PreAuthorize("hasAuthority('Employee')")
+    public ResponseEntity<ResponseWrapper> employeeUpdateTask(@RequestBody TaskDTO taskDTO) throws TicketingProjectException {
+        TaskDTO taskDTO1 = taskService.updateStatus(taskDTO);
+        return ResponseEntity.ok(new ResponseWrapper("Successfully task status updated.",taskDTO1));
     }
 }
