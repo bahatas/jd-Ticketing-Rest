@@ -32,7 +32,7 @@ public interface TaskService {
 
     List<TaskDTO> listAllByProject(ProjectDTO projectDTO);
     List<TaskDTO> listAllTasksByStatusIsNot(Status status) throws TicketingProjectException;
-    List<TaskDTO> listAllTasksByProjectManager(ProjectDTO projectDTO) throws TicketingProjectException;
+    List<TaskDTO> listAllTasksByProjectManager() throws TicketingProjectException;
 
     TaskDTO updateStatus(TaskDTO dto) throws TicketingProjectException;
 
