@@ -20,6 +20,7 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 @RestController
@@ -80,7 +81,7 @@ public class UserController {
     @PutMapping
     @DefaultExceptionMessage(defaultMessage = "Something went wrong try again")
     @Operation(summary = "Update User")
-    public ResponseEntity<ResponseWrapper> updateUser(@RequestBody UserDTO user) throws TicketingProjectException {
+    public ResponseEntity<ResponseWrapper> updateUser(@RequestBody UserDTO user) throws TicketingProjectException, AccessDeniedException {
         UserDTO updatedUser = userService.update(user);
 
         return ResponseEntity.ok(new ResponseWrapper("Succesfully updated",updatedUser));

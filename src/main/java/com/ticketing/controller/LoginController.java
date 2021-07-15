@@ -23,14 +23,13 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Authentication Controller", description = "Authenticate API")
 public class LoginController {
 
-	private AuthenticationManager authenticationManager;
-	private UserService  userService;
+private AuthenticationManager authenticationManager;
+	private UserService userService;
 	private MapperUtil mapperUtil;
 	private JWTUtil jwtUtil;
-	private  ConfirmationTokenService confirmationTokenService;
+	private ConfirmationTokenService confirmationTokenService;
 
-	public LoginController(AuthenticationManager authenticationManager, UserService userService,
-						   MapperUtil mapperUtil, JWTUtil jwtUtil, ConfirmationTokenService confirmationTokenService) {
+	public LoginController(AuthenticationManager authenticationManager, UserService userService, MapperUtil mapperUtil, JWTUtil jwtUtil, ConfirmationTokenService confirmationTokenService) {
 		this.authenticationManager = authenticationManager;
 		this.userService = userService;
 		this.mapperUtil = mapperUtil;
@@ -39,39 +38,45 @@ public class LoginController {
 	}
 
 	@PostMapping("/authenticate")
-	@DefaultExceptionMessage(defaultMessage = "Bad credentials")
+	@DefaultExceptionMessage(defaultMessage = "Bad Credentials")
 	@Operation(summary = "Login to application")
-	public ResponseEntity<ResponseWrapper>  doLogin(@RequestBody AuthenticationRequest authenticationRequest) throws TicketingProjectException {
+//	@ExecutionTime
+	public ResponseEntity<ResponseWrapper> doLogin(@RequestBody AuthenticationRequest authenticationRequest) throws TicketingProjectException {
 
-		String username = authenticationRequest.getUsername();
 		String password = authenticationRequest.getPassword();
+		String username = authenticationRequest.getUsername();
 
-		UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username,password);
-		authenticationManager.authenticate(authenticationToken); // debug
+		UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(username,password);
+		authenticationManager.authenticate(authentication);
 
 		UserDTO foundUser = userService.findByUserName(username);
-		User convertedUser = mapperUtil.convert(foundUser, new User());
+		User convertedUser = mapperUtil.convert(foundUser,new User());
 
-		if (!foundUser.isEnabled()) {
-			throw new TicketingProjectException("Please verify you user");
+		if(!foundUser.isEnabled()){
+			throw new TicketingProjectException("Please verify your user");
 		}
+
 		String jwtToken = jwtUtil.generateToken(convertedUser);
-		return ResponseEntity.ok(new ResponseWrapper("Login successfull", jwtToken));
+
+		return ResponseEntity.ok(new ResponseWrapper("Login Successful",jwtToken));
+
 	}
 
 
 
+	@DefaultExceptionMessage(defaultMessage = "Failed to confirm email, please try again!")
 	@GetMapping("/confirmation")
+	@Operation(summary = "Confirm account")
 	public ResponseEntity<ResponseWrapper> confirmEmail(@RequestParam("token") String token) throws TicketingProjectException {
 
 		ConfirmationToken confirmationToken = confirmationTokenService.readByToken(token);
-		UserDTO confirmed = userService.confirm(confirmationToken.getUser());
+		UserDTO confirmUser = userService.confirm(confirmationToken.getUser());
 		confirmationTokenService.delete(confirmationToken);
 
-		return ResponseEntity.ok(new ResponseWrapper("User has been confirmed", confirmed));
-
+		return ResponseEntity.ok(new ResponseWrapper("User has been confirmed!",confirmUser));
 
 	}
+
 
 
 }

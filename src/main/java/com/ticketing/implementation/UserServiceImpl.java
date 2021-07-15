@@ -4,16 +4,20 @@ import com.ticketing.dto.UserDTO;
 import com.ticketing.entity.User;
 import com.ticketing.exception.TicketingProjectException;
 import com.ticketing.repository.UserRepository;
+import com.ticketing.service.ProjectService;
+import com.ticketing.service.TaskService;
 import com.ticketing.service.UserService;
 import com.ticketing.utils.MapperUtil;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,13 +25,16 @@ public class UserServiceImpl implements UserService {
 
 
     private UserRepository userRepository;
-//    private ProjectService projectService;
-//    private TaskService taskService;
+    private ProjectService projectService;
+    private TaskService taskService;
     private MapperUtil mapperUtil;
     private PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository, MapperUtil mapperUtil, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository,
+                           ProjectService projectService, TaskService taskService, MapperUtil mapperUtil, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.projectService = projectService;
+        this.taskService = taskService;
         this.mapperUtil = mapperUtil;
         this.passwordEncoder = passwordEncoder;
     }
@@ -71,7 +78,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDTO update(UserDTO dto) throws TicketingProjectException, AccessDeniedException {
+    public UserDTO update(UserDTO dto) throws TicketingProjectException, AccessDeniedException, java.nio.file.AccessDeniedException {
 
         //Find current user
         User user = userRepository.findByUserName(dto.getUserName());
@@ -122,7 +129,16 @@ public class UserServiceImpl implements UserService {
         return mapperUtil.convert(confirmedUser,new UserDTO());
     }
 
-    public void checkForAuthorities(User user){
+    public void checkForAuthorities(User user) throws java.nio.file.AccessDeniedException {
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if(authentication!=null && !authentication.getName().equals("anonymousUser")){
+
+            Set<String> roles = AuthorityUtils.authorityListToSet(authentication.getAuthorities());
+
+            if(!(authentication.getName().equals(user.getId().toString()) || roles.contains("Admin"))){
+                throw new java.nio.file.AccessDeniedException("Access is denied");
+            }
+        }
     }
 }
